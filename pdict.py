@@ -65,20 +65,20 @@ class PDict(dict):
         super().__init__(self._defaultdict())
         self.update(data)
         if parseinit: self._parseinit()
-     
+
     def _defaultdict(self):
         """Overload this to set the initial dict (initdict) that will be used
         for default data."""
         return {}
-        
+
     def _parseinit(self):
         """Overload this to control data parsing when loading data at init."""
         pass
-     
+
     def reset(self):
-        """Reset current values back to values in initdict."""
+        """Reset current values back to values in default_dict."""
         self.update(self._defaultdict())
-     
+
     @property
     def default_dict(self):
         """The dict used to initalize and reset this object. Returns a new dict
