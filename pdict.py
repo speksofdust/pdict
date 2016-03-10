@@ -15,6 +15,7 @@
 #                                                                              #
 # ---------------------------------------------------------------------------- #
 
+VERSION = "0.1.2"
 
 def init_from_key(d, key, cls, *args, **kwargs):
     d[key] = cls(d, args, kwargs)
@@ -83,17 +84,21 @@ class PDict(dict):
     {'audio': {'volume: 21', 'panning': 0}, {'graphics': {'quality': 'high',
         'bilinear-filtering': False}}
     """
-    __slots__ = dict.__slots__
-    def __init__(data={}, parseinit=True, parseargs=()):
+    __slots__ = dict.__slots__ + "_default_dictargs"
+    def __init__(data={}, parseinit=True, parseargs=(), default_dictargs=()):
         # init the super class (dict) using _defaultdict
-        super().__init__(self._defaultdict())
-
+        self._default_dictargs = tuple(default_dictargs)
+        super().__init__(self._defaultdict)
         self.update(data)
 
-        if parseinit == True:
-            if parseinit == 'ifdata':
-                 if data: self._parseinit(parseargs)
-            else: self._parseinit(parseargs)
+        if parseinit == ('ifdata' or 2):
+            if data: self._parseinit(parseargs)
+        elif parseinit == True: self._parseinit(parseargs)  # always parse
+        else pass   # dont parse
+
+    def _get_default_dictargs(self): return self._default_dictargs
+    def _set_default_dictargs(self, d): self._default_dictargs = tuple(d)
+        _default_dictargs = property(_get_default_dictargs, _set_default_dictargs)
 
     def _defaultdict(self):
         """Overload this to set the initial dict (initdict) that will be used
@@ -106,13 +111,13 @@ class PDict(dict):
 
     def reset(self):
         """Reset current values back to values in default_dict."""
-        self.update(self._defaultdict())
+        self.update(self._defaultdict)
 
     @property
     def default_dict(self):
         """The dict used to initalize and reset this object. Returns a new dict
         defined by '_defaultdict'."""
-        return self._defaultdict
+        return self._defaultdict()
 
     def modified_values(self):
         """Return an iterator of keys for values that differ from those in
@@ -136,6 +141,7 @@ class PDict(dict):
 class ChildPDict(PDict):
     """Same as PDict, except adds a '_parent' attribute."""
     __slots__ = PDict.__slots__ + "_parent"
-    def __init__(self, parent, data={}, parseinit=True, parseargs=()):
+    def __init__(self, parent, data={}, parseinit=True, parseargs=(), default_dictargs=()):
         self._parent = parent
-        super().__init__(data=data, parseinit=parseinit, parseargs=parseargs)
+        super().__init__(data=data, parseinit=parseinit, parseargs=parseargs,
+            default_dictargs=default_dictargs)
