@@ -15,7 +15,7 @@
 #                                                                              #
 # ---------------------------------------------------------------------------- #
 
-VERSION = "0.1.2"
+VERSION = "0.1.3"
 
 def init_from_key(d, key, cls, *args, **kwargs):
     d[key] = cls(d, args, kwargs)
@@ -135,7 +135,11 @@ class PDict(dict):
 
     def has_new_keys(self):
         """True if any keys are present that do not exist in initvalues."""
-        return iter(i for i in self.keys() if i not in self._defaultdict.keys()
+        return any(i for i in self.keys() if i not in self._defaultdict.keys())
+
+    def get_new_keys(self):
+        """ Yield any keys present that do not exist in in it values."""
+        return iter(i for i in self.keys() if i not in self._defaultdict.keys())
 
 
 class ChildPDict(PDict):
